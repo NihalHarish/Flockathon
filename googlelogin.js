@@ -8,10 +8,17 @@ var OAuth2 = google.auth.OAuth2;
 // Load client secrets from a local file.
 googledata = JSON.parse(fs.readFileSync('keys/client_secret.json').toString());
 
+if(process.env.environ=='aws'){
+redirect_code = 0;
+}
+else{
+redirect_code = 1;
+}
+
 var oauth2Client = new OAuth2(
   googledata.web.client_id,
   googledata.web.client_secret,
-  googledata.web.redirect_uris[1]
+  googledata.web.redirect_uris[redirect_code]
 );
 
 // generate a url that asks permissions for Google+ and Google Calendar scopes
