@@ -1,9 +1,13 @@
 var google = require('googleapis');
 var fs = require('fs');
-var express = require('express')
+var express = require('express');
 var app = express();
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 var request = require('request');
+
+// Configure app to be a side bar app
+// Build UI for sidebar register endpoint for it i.e typeahead
+// Make a map between the Google API and the natural language input used for it.
 
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
@@ -34,7 +38,7 @@ var scopes = [
   'https://www.googleapis.com/auth/drive.metadata.readonly',
 ];
 
-function saveSettings (settings) {
+function saveSettings(settings) {
   console.log("Saving settings for "+settings.userId);
   console.log(settings);
     var file = settings.userId+'.json';
