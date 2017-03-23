@@ -9,8 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.17.1",
     "express": "^4.15.2",
     "google-auth-library": "^0.10.0",
-    "googleapis": "^18.0.0"
+    "googleapis": "^18.0.0",
+    "request": "^2.81.0"
   }
 }
