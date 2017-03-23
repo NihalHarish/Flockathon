@@ -20,7 +20,7 @@ var scopes = [
 ];
 
 app.get('/flock', function(req,res){
-  res.send();
+  res.sendStatus(200);
 });
 
 app.get('/googleredirect', function(req,res){
