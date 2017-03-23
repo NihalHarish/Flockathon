@@ -80,19 +80,6 @@ app.post('/flock', function(req,res){
 }
 });
 
-// app.get('/install', function(req,res){
-//   console.log("in install")
-//   data = JSON.parse(req.body);
-//   console.log(data);
-//   saveSettings({userId:data.userId, token: data.token});
-//   res.sendStatus(200);
-// });
-
-// app.all("*", function(req,res){
-// console.log(req.query);
-// console.log(req.body);
-// });
-
 app.get('/googleredirect', function(req,res){
   var code = req.query.code;
   var searchstring = req.query.searchstring;
@@ -101,6 +88,7 @@ app.get('/googleredirect', function(req,res){
   if (!err) {
     console.log(tokens)
     oauth2Client.setCredentials(tokens);
+    listFiles(oauth2Client);
     res.send({success:true});
   }
   else{
@@ -125,6 +113,37 @@ app.get('/drivesearch', function (req, res) {
 
   res.redirect(url);
 });
+
+/**
+ * Lists the names and IDs of up to 10 files.
+ *
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ */
+function listFiles(auth) {
+  var service = google.drive('v3');
+  service.files.list({
+    auth: auth,
+    pageSize: 100,
+    fields: "nextPageToken, files(id, name)",
+    q: "name contains 'CS231n'"
+  }, function(err, response) {
+    if (err) {
+      console.log('The API returned an error: ' + err);
+      return;
+    }
+    var files = response.files;
+    if (files.length == 0) {
+      console.log('No files found.');
+    } else {
+      console.log('Files:');
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        console.log(files)
+        console.log('%s (%s)', file.name, file.id);
+      }
+    }
+  });
+}
 
 
 app.listen(8080);
