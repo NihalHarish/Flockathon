@@ -6,7 +6,7 @@ var app = express();
 var OAuth2 = google.auth.OAuth2;
 
 // Load client secrets from a local file.
-googledata = JSON.parse(fs.readFileSync('client_secret.json').toString());
+googledata = JSON.parse(fs.readFileSync('keys/client_secret.json').toString());
 
 var oauth2Client = new OAuth2(
   googledata.web.client_id,
