@@ -8,6 +8,7 @@ var request = require('request');
 // Configure app to be a side bar app
 // Build UI for sidebar register endpoint for it i.e typeahead
 // Make a map between the Google API and the natural language input used for it.
+// Show mocks during presentation for History, calendar etc to help better understand the idea.
 
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
@@ -128,7 +129,7 @@ function listFiles(auth) {
   service.files.list({
     auth: auth,
     pageSize: 100,
-    fields: "nextPageToken, files(id, name)",
+    fields: "nextPageToken, files(id, name, owners)",
     q: "name contains 'CS231n'"
   }, function(err, response) {
     if (err) {
@@ -143,7 +144,7 @@ function listFiles(auth) {
       for (var i = 0; i < files.length; i++) {
         var file = files[i];
         console.log(files)
-        console.log('%s (%s)', file.name, file.id);
+        console.log('%s (%s) link: %s', file.name, file.id, file.owners);
       }
     }
   });
