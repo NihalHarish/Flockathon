@@ -46,6 +46,17 @@ function saveSettings(settings) {
     fs.writeFileSync(file,JSON.stringify(settings));
 }
 
+function saveGoogleSettings(settings) {
+  console.log("Saving google settings for "+settings);
+  var file = 'googleauth.json';
+  fs.writeFileSync(file,JSON.stringify(settings));
+}
+
+function getGoogleSettings(){
+  var settings = JSON.parse(fs.readFileSync('googleauth.json').toString());
+  return settings;
+}
+
 function getSettings(userId){
   var file = userId+'.json';
   var settings = JSON.parse(fs.readFileSync(file).toString());
@@ -56,7 +67,7 @@ app.post('/flock', function(req,res){
   console.log("in /flock")
   // console.log(req.query);
   if(req.body.name == "app.install"){
-    console.log("in install")
+    console.log("in install");
     console.log(req.body.userId);
     saveSettings({userId:req.body.userId, token: req.body.token});
     res.sendStatus(200);
@@ -66,6 +77,7 @@ app.post('/flock', function(req,res){
     res.sendStatus(200);
   }
   else{
+  oauth2Client.setCredentials(getGoogleSettings());
   console.log("in the /screwdrive command")
   console.log(req.body);
   console.log(req.body.userId)
@@ -74,26 +86,23 @@ app.post('/flock', function(req,res){
   var initiator_settings = getSettings(initiator_user_id);
   var receiver_settings = getSettings(receiver_user_id)
   console.log(initiator_settings);
-
-  request("https://api.flock.co/v1/chat.sendMessage?to="+receiver_settings.userId+"&text="+"geloo"+"&token="+initiator_settings.token, function (error, response, body) {
-    console.log('error:', error); // Print the error if one occurred
-    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    console.log('body:', body); // Print the HTML for the Google homepage.
-  });
-
+  console.log("test data"+ listFiles(oauth2Client,receiver_settings.userId,initiator_settings.token, req.body.text));
   res.sendStatus(200);
 }
 });
 
 app.get('/googleredirect', function(req,res){
   var code = req.query.code;
-  var searchstring = req.query.searchstring;
+  var searchstring = req.query.test;
+  console.log(req.query);
+  console.log(req.body);
   oauth2Client.getToken(code, function (err, tokens) {
   // Now tokens contains an access_token and an optional refresh_token. Save them.
   if (!err) {
-    console.log(tokens)
+    console.log(tokens);
     oauth2Client.setCredentials(tokens);
-    listFiles(oauth2Client);
+    saveGoogleSettings(tokens);
+    // listFiles(oauth2Client);
     res.send({success:true});
   }
   else{
@@ -113,7 +122,7 @@ app.get('/drivesearch', function (req, res) {
     scope: scopes,
 
     // Optional property that passes state parameters to redirect URI
-    state: { searchstring: searchstring }
+    state: { test: "test" }
   });
 
   res.redirect(url);
@@ -124,21 +133,24 @@ app.get('/drivesearch', function (req, res) {
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function listFiles(auth) {
+function listFiles(auth,userId,token,query) {
   var service = google.drive('v3');
+  var output = "Nothing";
   service.files.list({
     auth: auth,
     pageSize: 100,
-    fields: "nextPageToken, files(id, name, owners)",
-    q: "name contains 'CS231n'"
+    fields: "nextPageToken, files(id, name, owners,webViewLink)",
+    q: query
+    // q: "name contains 'CS231n'"
   }, function(err, response) {
     if (err) {
       console.log('The API returned an error: ' + err);
-      return;
+      output = "Error searching";
     }
     var files = response.files;
     if (files.length == 0) {
       console.log('No files found.');
+      output =  "No files found."
     } else {
       console.log('Files:');
       for (var i = 0; i < files.length; i++) {
@@ -146,7 +158,13 @@ function listFiles(auth) {
         console.log(files)
         console.log('%s (%s) link: %s', file.name, file.id, file.owners);
       }
+      output =  files[0].webViewLink;
     }
+    request("https://api.flock.co/v1/chat.sendMessage?to="+userId+"&text="+output+"&token="+token, function (error, response, body) {
+      console.log('error:', error); // Print the error if one occurred
+      console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+      console.log('body:', body); // Print the HTML for the Google homepage.
+    });
   });
 }
 
