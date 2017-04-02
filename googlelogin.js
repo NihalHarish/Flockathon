@@ -130,6 +130,19 @@ function process_response(auth,userId,token,data) {
 			query_str += "or \'" + str + "\' in owners ";
                 }
 		}
+	if(data.hasOwnProperty("contact")) {
+                var queries = data["contact"];
+                for(var i=0;i< queries.length; i++) {
+                        var str = queries[i]["value"].split('@')[0];
+                        if(query_str!="") {
+                                        query_str += "or ";
+                        }
+                        query_str += "\'" + str + "\' in writers ";
+                        query_str += "or \'" + str + "\' in readers ";
+                        query_str += "or \'" + str + "\' in owners ";
+                }
+                }
+
 	console.log(query_str);
 	getFiles(auth,userId,token,query_str);
 	
