@@ -5,6 +5,11 @@ var app = express();
 var bodyParser = require('body-parser');
 var request = require('request');
 
+const {Wit, log} = require('node-wit');
+
+var ACCESS_TOKEN = "KXKZYJIHXFSMSGLFCEIG77YP6FESIDLA";
+var timestamp = require("internet-timestamp")
+
 // Configure app to be a side bar app
 // Build UI for sidebar register endpoint for it i.e typeahead
 // Make a map between the Google API and the natural language input used for it.
