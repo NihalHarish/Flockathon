@@ -146,7 +146,7 @@ function getNextFormattedDate(date) {
 }
 
 function process_response(auth,data,res) {
-	//data = {"msg_id":"d765971a-e900-4f44-9c9d-4388a692f8ee","_text":"Find .doc file created day before yesterday and shared with Neha. It contains the word \"gold\".","entities":{"file_type":[{"confidence":1,"type":"value","value":".doc"}],"datetime":[{"confidence":1,"values":[],"value":"2017-03-31T00:00:00.000Z","grain":"day","type":"value"}],"contact":[{"confidence":0.9039439687513042,"type":"value","value":"Neha","suggested":true}],"search_query":[{"confidence":0.9895917414532904,"type":"value","value":"gold","suggested":true}],"intent":[{"confidence":0.9999471979446221,"value":"file search"}]}};
+	//data = {"msg_id":"bdb9442c-67bc-48bc-bebd-63dd757ad7aa","_text":"Find .pdf file created today and shared with ramesharvind1994@gmail.com containing \"query\"","entities":{"search_query":[{"confidence":0.9305019054212019,"type":"value","value":"pdf","suggested":true},{"confidence":0.8230538058590983,"type":"value","value":"query","suggested":true}],"datetime":[{"confidence":1,"values":[{"value":"2017-04-02T00:00:00.000Z","grain":"day","type":"value"}],"value":"2017-04-02T00:00:00.000Z","grain":"day","type":"value"}],"email":[{"confidence":0.9825124574262902,"value":"ramesharvind1994@gmail.com"}],"intent":[{"confidence":0.9999590404070314,"value":"file search"}],"file_type":[{"confidence":0.9952033700701766,"value":"pdf"}]}};
 	var query_str = "";
 	data = data["entities"];
 	if(data.hasOwnProperty("search_query")){
@@ -182,10 +182,10 @@ function process_response(auth,data,res) {
                         query_str += "mimeType contains \'" + str + "\' ";
                 }
         }
-	if(data.hasOwnProperty("contact")) {
-		var queries = data["contact"];
+	if(data.hasOwnProperty("email")) {
+		var queries = data["email"];
                 for(var i=0;i< queries.length; i++) {
-                        var str = queries[i]["value"];
+                        var str = queries[i]["value"].split('@')[0];
                         if(query_str!="") {
                                         query_str += "or ";
                         }
@@ -243,7 +243,7 @@ function getFiles(auth,query_str,res) {
       for (var i = 0; i < files.length; i++) {
         var file = files[i];
         //console.log(JSON.stringify(files))
-        //console.log('%s (%s) link: %s', file.name, file.id, file.owners);
+        console.log('%s (%s) link: %s', file.name, file.id, file.owners);
       }
     }
   });
