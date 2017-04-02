@@ -63,6 +63,96 @@ function getSettings(userId){
   return settings;
 }
 
+function getFormattedDate(date) {
+	var date_n = new Date(date);
+	var rfc_date = timestamp(date_n);
+	return rfc_date;
+}
+
+function getNextFormattedDate(date) {
+	var date_n = new Date(date);
+	date_n.setTime( date_n.getTime() + 1 * 86400000 );
+	 var rfc_date = timestamp(date_n);
+        return rfc_date;
+}
+
+function process_response(auth,userId,token,data) {
+	//data = {"msg_id":"bdb9442c-67bc-48bc-bebd-63dd757ad7aa","_text":"Find .pdf file created today and shared with ramesharvind1994@gmail.com containing \"query\"","entities":{"search_query":[{"confidence":0.9305019054212019,"type":"value","value":"pdf","suggested":true},{"confidence":0.8230538058590983,"type":"value","value":"query","suggested":true}],"datetime":[{"confidence":1,"values":[{"value":"2017-04-02T00:00:00.000Z","grain":"day","type":"value"}],"value":"2017-04-02T00:00:00.000Z","grain":"day","type":"value"}],"email":[{"confidence":0.9825124574262902,"value":"ramesharvind1994@gmail.com"}],"intent":[{"confidence":0.9999590404070314,"value":"file search"}],"file_type":[{"confidence":0.9952033700701766,"value":"pdf"}]}};
+	var query_str = "";
+	data = data["entities"];
+	if(data.hasOwnProperty("search_query")){
+		var queries = data["search_query"];
+		for(var i=0;i< queries.length; i++) {
+			var str = queries[i]["value"];
+			if(query_str!="") {
+					query_str += "or ";
+			}
+			query_str += "fullText contains \'" + str + "\' ";
+			query_str += "or name contains \'" + str + "\' ";
+		}
+	}
+	if(data.hasOwnProperty("datetime")){
+                var queries = data["datetime"];
+                for(var i=0;i< queries.length; i++) {
+                        var str = queries[i]["value"];
+                        if(query_str!="") {
+                                        query_str += "or (";
+                        }
+                        query_str += "modifiedTime >= \'" + getFormattedDate(str) + "\' ";
+			query_str += "and modifiedTime < \'" + getNextFormattedDate(str) + "\') ";
+			break;	
+                }
+        }
+	if(data.hasOwnProperty("file_type")){
+                var queries = data["file_type"];
+                for(var i=0;i< queries.length; i++) {
+                        var str = queries[i]["value"];
+                        if(query_str!="") {
+                                        query_str += "or ";
+                        }
+                        query_str += "mimeType contains \'" + str + "\' ";
+                }
+        }
+	if(data.hasOwnProperty("email")) {
+		var queries = data["email"];
+                for(var i=0;i< queries.length; i++) {
+                        var str = queries[i]["value"].split('@')[0];
+                        if(query_str!="") {
+                                        query_str += "or ";
+                        }
+                        query_str += "\'" + str + "\' in writers ";
+                        query_str += "or \'" + str + "\' in readers ";
+			query_str += "or \'" + str + "\' in owners ";
+                }
+		}
+	console.log(query_str);
+	getFiles(auth,userId,token,query_str);
+	
+
+
+}
+	
+			
+function getQuery(auth,userId,token,searchstring) {
+	console.log(searchstring)
+	const client = new Wit({accessToken: ACCESS_TOKEN});
+		client.message(searchstring, {})
+.then((data) => {
+	  console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
+		process_response(auth,userId,token,data);
+	})
+	.catch(console.error);
+	
+}
+
+
+
+function listFiles(auth,userId,token,query) {
+	getQuery(auth,userId,token,query);
+}
+
+
+
 app.post('/flock', function(req,res){
   console.log("in /flock")
   // console.log(req.query);
@@ -133,7 +223,7 @@ app.get('/drivesearch', function (req, res) {
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function listFiles(auth,userId,token,query) {
+function getFiles(auth,userId,token,query) {
   var service = google.drive('v3');
   var output = "Nothing";
   service.files.list({
