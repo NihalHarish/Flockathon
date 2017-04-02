@@ -146,6 +146,7 @@ function getNextFormattedDate(date) {
 }
 
 function process_response(auth,data,res) {
+	//data = {"msg_id":"d765971a-e900-4f44-9c9d-4388a692f8ee","_text":"Find .doc file created day before yesterday and shared with Neha. It contains the word \"gold\".","entities":{"file_type":[{"confidence":1,"type":"value","value":".doc"}],"datetime":[{"confidence":1,"values":[],"value":"2017-03-31T00:00:00.000Z","grain":"day","type":"value"}],"contact":[{"confidence":0.9039439687513042,"type":"value","value":"Neha","suggested":true}],"search_query":[{"confidence":0.9895917414532904,"type":"value","value":"gold","suggested":true}],"intent":[{"confidence":0.9999471979446221,"value":"file search"}]}};
 	var query_str = "";
 	data = data["entities"];
 	if(data.hasOwnProperty("search_query")){
@@ -155,7 +156,7 @@ function process_response(auth,data,res) {
 			if(query_str!="") {
 					query_str += "or ";
 			}
-			query_str += "fulltext contains \'" + str + "\' ";
+			query_str += "fullText contains \'" + str + "\' ";
 			query_str += "or name contains \'" + str + "\' ";
 		}
 	}
@@ -190,7 +191,7 @@ function process_response(auth,data,res) {
                         }
                         query_str += "\'" + str + "\' in writers ";
                         query_str += "or \'" + str + "\' in readers ";
-			query_str += "or \'" + str + "\' in ownders ";
+			query_str += "or \'" + str + "\' in owners ";
                 }
 	}
 	console.log(query_str);
